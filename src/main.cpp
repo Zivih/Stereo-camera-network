@@ -21,12 +21,13 @@ int main(int argc, char **argv){
                 rdata = rightcam->getData();
                 if(rdata != NULL){
                     //arriva il messaggio fin qui
-                    std::cin;
                     std::cout << (char *)rdata << std::endl;
                 }
             }
+            usleep(1000);
             //std::cout << ((char *)rdata)[0];
         }
+        usleep(100);
     }
     return 0;
 }

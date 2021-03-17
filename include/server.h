@@ -15,9 +15,8 @@ namespace tcpserver{
     typedef struct clientstate clientstate;
     
     struct packet{ //da rivedere
-        struct timeval inizio;
-        size_t lenght;
-        void *startpoint;
+        uint32_t lenght;
+        char *data;
     };
 
     struct clientstate{
@@ -40,7 +39,7 @@ namespace tcpserver{
     };
     class Server{
     public:
-        uint16_t port;
+        uint16_t port, magicNum = 1337;
         struct sockaddr_in address;
         int sfd;
         bool running;

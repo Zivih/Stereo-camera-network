@@ -146,19 +146,23 @@ namespace tcpserver{
         while(running){
             char buffer[BUFFERSIZE];
             if(!pending){
-                char len[4];
-                if(read(cfd,len,4) <= 0){
-                    std::cout << "errore" << std::endl;
-                    free(pool[poolIndex]);
+                char header[8];
+                if(read(cfd,header,8) <= 0){
+                    std::cout << "errore " << (pool[poolIndex]->name) << std::endl;
                     pool[poolIndex] = NULL;
                     break;
                 }
-                datalen = *((uint32_t *)len);
-                memset(len,0,4);
+                if(*((uint32_t *)header) != magicNum){
+                    std::cout << "Pacchetto corrotto" << header << std::endl;
+                    memset(header,0,8);
+                    continue;
+                }
+                datalen = *((uint32_t *)(header+4));
+                memset(header,0,8);
                 index = datalen;
                 if((datalen > 10000000) || (datalen == 0)){
-                    std::cout << "Size Issue" << std::endl;
-                    break;
+                    std::cout << "Size Issue " << datalen << std::endl;
+                    continue;
                 }
                 std::cout << "Data Lenght: " << datalen << std::endl;
                 //allocazione memoria per il messaggio
@@ -175,12 +179,11 @@ namespace tcpserver{
                 pending = 0;
                 std::cout << "Blocco Ricevuto" << std::endl;
                 //qui costruiamo il pacchetto da inserire nel pool, deve essere riferito a questo client
-                char *newpacket = (char *)calloc(datalen,sizeof(char));
-                memcpy(newpacket, data, datalen);
-
-                struct packet *finalpacket = (struct packet *)newpacket;
-
-                state.addToQueue(finalpacket);
+                packet newpacket;
+                newpacket.lenght = datalen;
+                newpacket.data = (char *)calloc(datalen,sizeof(char));
+                memcpy(newpacket.data, data, datalen);
+                state.addToQueue(&newpacket);
                 //ogni client ha come riferimento uno stato clientstate
                 //free(data);
             }
